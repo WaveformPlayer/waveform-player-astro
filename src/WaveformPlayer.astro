@@ -143,6 +143,9 @@ const {
 	// Accessibility + error UI
 	accessibleSeek,
 	seekLabel,
+	seekValueText,
+	playPauseLabel,
+	speedLabel,
 	errorText,
 	// Markers
 	markers,
@@ -151,7 +154,9 @@ const {
 	title,
 	artist,
 	artwork,
+	artworkAlt,
 	album,
+	unknownTrackText,
 	// Behaviour
 	autoplay,
 	singlePlay,
@@ -263,6 +268,9 @@ setStr('data-button-size', buttonSize != null ? String(buttonSize) : null);
 // ─── Accessibility + error UI ────────────────────────────────────────────
 setBool('data-accessible-seek', accessibleSeek);
 setStr('data-seek-label', seekLabel ?? null);
+setStr('data-seek-value-text', seekValueText ?? null);
+setStr('data-play-pause-label', playPauseLabel ?? null);
+setStr('data-speed-label', speedLabel ?? null);
 setStr('data-error-text', errorText ?? null);
 
 // ─── Markers ─────────────────────────────────────────────────────────────
@@ -275,7 +283,9 @@ setBool('data-show-markers', showMarkers);
 setStr('data-title', title ?? null);
 setStr('data-artist', artist ?? null);
 setStr('data-artwork', artwork ?? null);
+setStr('data-artwork-alt', artworkAlt ?? null);
 setStr('data-album', album ?? null);
+setStr('data-unknown-track-text', unknownTrackText ?? null);
 
 // ─── Behaviour ───────────────────────────────────────────────────────────
 setBool('data-autoplay', autoplay);
