@@ -140,6 +140,7 @@ const {
 	layout,
 	buttonStyle,
 	buttonSize,
+	buttonRadius,
 	// Accessibility + error UI
 	accessibleSeek,
 	seekLabel,
@@ -155,6 +156,7 @@ const {
 	artist,
 	artwork,
 	artworkAlt,
+	artworkPosition,
 	album,
 	unknownTrackText,
 	// Behaviour
@@ -264,6 +266,8 @@ setStr('data-button-align', buttonAlign ?? null);
 setStr('data-layout', layout ?? null);
 setStr('data-button-style', buttonStyle ?? null);
 setStr('data-button-size', buttonSize != null ? String(buttonSize) : null);
+setStr('data-button-radius', buttonRadius != null ? String(buttonRadius) : null);
+setStr('data-artwork-position', artworkPosition ?? null);
 
 // ─── Accessibility + error UI ────────────────────────────────────────────
 setBool('data-accessible-seek', accessibleSeek);

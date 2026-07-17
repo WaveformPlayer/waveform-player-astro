@@ -267,6 +267,45 @@ describe('<WaveformPlayer> — playback controls', () => {
 	});
 });
 
+// ─── Button appearance ───────────────────────────────────────────────────
+
+describe('<WaveformPlayer> — button appearance props', () => {
+	it('emits button style, size, and radius as strings', async () => {
+		const html = await render({
+			url: '/a.mp3',
+			buttonStyle: 'minimal',
+			buttonSize: 64,
+			buttonRadius: '0.5rem',
+		});
+
+		expect(getAttr(html, 'data-button-style')).toBe('minimal');
+		expect(getAttr(html, 'data-button-size')).toBe('64');
+		expect(getAttr(html, 'data-button-radius')).toBe('0.5rem');
+	});
+
+	it('emits buttonRadius={0} rather than dropping it as falsy', async () => {
+		const html = await render({ url: '/a.mp3', buttonRadius: 0 });
+		expect(getAttr(html, 'data-button-radius')).toBe('0');
+	});
+
+	it('omits the button attrs when unset so the core defaults apply', async () => {
+		const html = await render({ url: '/a.mp3' });
+		expectNoAttr(html, 'data-button-size');
+		expectNoAttr(html, 'data-button-radius');
+	});
+
+	it('emits artworkPosition, and omits it when unset', async () => {
+		const html = await render({
+			url: '/a.mp3',
+			artwork: '/cover.jpg',
+			artworkPosition: 'button',
+		});
+		expect(getAttr(html, 'data-artwork-position')).toBe('button');
+
+		expectNoAttr(await render({ url: '/a.mp3', artwork: '/cover.jpg' }), 'data-artwork-position');
+	});
+});
+
 // ─── UI toggles ──────────────────────────────────────────────────────────
 
 describe('<WaveformPlayer> — UI toggle props', () => {
