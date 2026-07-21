@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-07-22
+
+### Added
+
+- **`crossOrigin` prop.** Exposes the option added in
+  `@arraypress/waveform-player@1.23.0`, emitted as `data-cross-origin`
+  (`'anonymous'` | `'use-credentials'`). Omitted by default so the player
+  behaves like a native `<audio>` and never forces a CORS request that would
+  break CDN media without `Access-Control-Allow-Origin`.
+
 ## [0.6.0] — 2026-07-17
 
 ### Added

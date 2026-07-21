@@ -132,6 +132,7 @@ describe('<WaveformPlayer> — minimal props', () => {
 		// didn't ask for and the library can't apply its own defaults.
 		expectNoAttr(html, 'data-audio-mode');
 		expectNoAttr(html, 'data-preload');
+		expectNoAttr(html, 'data-cross-origin');
 		expectNoAttr(html, 'data-waveform-style');
 		expectNoAttr(html, 'data-height');
 		expectNoAttr(html, 'data-samples');
@@ -178,6 +179,16 @@ describe('<WaveformPlayer> — audio source props', () => {
 	it('emits data-preload when preload is set', async () => {
 		const html = await render({ url: '/a.mp3', preload: 'none' });
 		expect(getAttr(html, 'data-preload')).toBe('none');
+	});
+
+	it('emits data-cross-origin when crossOrigin is set', async () => {
+		const html = await render({ url: '/a.mp3', crossOrigin: 'anonymous' });
+		expect(getAttr(html, 'data-cross-origin')).toBe('anonymous');
+	});
+
+	it('omits data-cross-origin by default (native <audio> behavior)', async () => {
+		const html = await render({ url: '/a.mp3' });
+		expectNoAttr(html, 'data-cross-origin');
 	});
 });
 

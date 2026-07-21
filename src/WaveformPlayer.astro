@@ -113,6 +113,7 @@ const {
 	src,
 	audioMode,
 	preload,
+	crossOrigin,
 	// Waveform visualisation
 	waveformStyle,
 	height,
@@ -217,6 +218,7 @@ const setBool = (key: string, value: boolean | undefined | null): void => {
 setStr('data-url', url ?? src ?? null);
 setStr('data-audio-mode', audioMode ?? null);
 setStr('data-preload', preload ?? null);
+setStr('data-cross-origin', crossOrigin ?? null);
 
 // ─── Waveform visualisation ──────────────────────────────────────────────
 setStr('data-waveform-style', waveformStyle ?? null);
