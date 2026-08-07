@@ -1,0 +1,27 @@
+# CLAUDE.md — @arraypress/waveform-player-astro
+
+Astro wrapper for `@arraypress/waveform-player`. Renders the container markup and
+passes options as `data-*` attributes for the core to parse client-side.
+
+## Commands
+- `npm test` — vitest. **This is the only pre-publish gate: there is no `build`
+  and no `prepublishOnly`** — the package ships `src/` directly.
+
+## The rule that matters: two edits per option, both manual
+
+`src/WaveformPlayer.astro`. A new option needs **both**:
+1. Add it to the `Astro.props` destructure.
+2. Add `setStr('data-<kebab>', <key> ?? null);` — kebab-case
+   (`crossOrigin` → `data-cross-origin`).
+
+Miss either and the prop typechecks fine and is silently dropped at runtime.
+
+## Conventions
+- Prop **types** derive from core's `WaveformPlayerOptions` via `Omit<>` — never
+  re-declare the option surface here. Types flowing does **not** mean values flow;
+  the `setStr` list above is the actual runtime contract.
+- `style` stays Astro's CSS prop — the visual style prop is `waveformStyle`.
+- Add a mirror test in `test/WaveformPlayer.test.ts` + a `CHANGELOG.md` entry.
+
+## Cross-repo
+One of 15 packages that must change together — load the `waveform-release` skill.
