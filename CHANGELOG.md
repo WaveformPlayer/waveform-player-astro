@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Forwarding-drift test.** `test/forwarding-drift.test.ts` enumerates the
+  installed core's option surface (`DEFAULT_OPTIONS` plus the
+  `WaveformPlayerOptions` keys), renders each option, and feeds the emitted
+  `data-*` attributes through the installed core's own `parseDataAttributes()` —
+  failing for any option that doesn't round-trip and isn't listed in
+  `NOT_FORWARDED` with a reason. Test-only; adds `@types/node` as a dev
+  dependency.
+
 ### Changed
 
 - **`onNextTrack` / `onPreviousTrack` are no longer props.** They were typed —

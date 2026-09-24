@@ -16,6 +16,14 @@ passes options as `data-*` attributes for the core to parse client-side.
 
 Miss either and the prop typechecks fine and is silently dropped at runtime.
 
+`test/forwarding-drift.test.ts` renders every option the installed core has and
+feeds the emitted `data-*` through the core's own `parseDataAttributes()`, so it
+fails on either miss. A deliberately unforwarded option goes in its
+`NOT_FORWARDED` map with a reason; a new option with a `null` default needs a
+sample value in `test/core-options.ts` (the test says so). A new attribute that
+needs a newer core than the peer floor also means raising the floor
+(`test/peer-range.test.ts` lists which attribute sets it).
+
 ## Conventions
 - Prop **types** derive from core's `WaveformPlayerOptions` via `Omit<>` — never
   re-declare the option surface here. Types flowing does **not** mean values flow;
