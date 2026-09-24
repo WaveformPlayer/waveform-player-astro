@@ -121,6 +121,7 @@ const {
 	barWidth,
 	barSpacing,
 	barRadius,
+	waveformGradient,
 	waveform,
 	// Colours
 	colorPreset,
@@ -135,6 +136,7 @@ const {
 	showInfo,
 	showTime,
 	showHoverTime,
+	seekHandle,
 	showBPM,
 	bpm,
 	buttonAlign,
@@ -227,6 +229,9 @@ setNum('data-samples', samples);
 setNum('data-bar-width', barWidth);
 setNum('data-bar-spacing', barSpacing);
 setNum('data-bar-radius', barRadius);
+// Gradient axis ('vertical' | 'horizontal' | 'diagonal') for array colours —
+// a plain string, which the core reads verbatim from `data-waveform-gradient`.
+setStr('data-waveform-gradient', waveformGradient ?? null);
 
 // `waveform` accepts an array (JSON-stringify it) or a string (URL/inline
 // JSON — pass through). The library handles both forms.
@@ -260,6 +265,7 @@ setBool('data-show-controls', showControls);
 setBool('data-show-info', showInfo);
 setBool('data-show-time', showTime);
 setBool('data-show-hover-time', showHoverTime);
+setBool('data-seek-handle', seekHandle);
 // The library's data-attribute parser reads `data-show-bpm` (lowercased
 // `bpm`), NOT `data-show-b-p-m`. Get this wrong and BPM never displays.
 setBool('data-show-bpm', showBPM);

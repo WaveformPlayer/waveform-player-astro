@@ -58,7 +58,7 @@ export type {
  * Inherits every construction option from the core library's
  * {@link WaveformPlayerOptions} (including `accessibleSeek`, `seekLabel`,
  * `barRadius`, and the gradient-array forms of `waveformColor` /
- * `progressColor`) and layers on the Astro-specific extras. Two groups of
+ * `progressColor`) and layers on the Astro-specific extras. Three groups of
  * core options are deliberately removed:
  *
  *  - `url` — optional on the core options, but **required** here (the
@@ -69,11 +69,15 @@ export type {
  *    is the HTML inline-style attribute. We remove the core's alias and
  *    redeclare `style` below as the inline-CSS `string`; consumers select
  *    the visual style via the canonical `waveformStyle` prop instead.
- *  - the `on*` lifecycle callbacks (`onLoad`, `onPlay`, …) — these are JS
- *    functions, and a server-rendered Astro component emits static HTML
- *    plus `data-*` attributes with nothing to attach a runtime callback
- *    to. Consumers wire lifecycle handling via the DOM
- *    `waveformplayer:*` events instead.
+ *  - every `on*` callback — the lifecycle ones (`onLoad`, `onPlay`, …) and
+ *    the Media Session track-navigation ones (`onNextTrack`,
+ *    `onPreviousTrack`). These are JS functions, and a server-rendered
+ *    Astro component emits static HTML plus `data-*` attributes with
+ *    nothing to attach a runtime callback to — typed, they'd type-check and
+ *    then silently do nothing. Consumers wire lifecycle handling via the
+ *    DOM `waveformplayer:*` events instead; lock-screen skip buttons need a
+ *    player constructed in client JS (or `@arraypress/waveform-bar` /
+ *    `-playlist`, which supply them).
  *
  * Because the option surface is inherited rather than hand-copied, anything
  * the core adds in future is exposed here without a manual edit.
@@ -89,6 +93,8 @@ export interface WaveformPlayerProps
 		| 'onEnd'
 		| 'onError'
 		| 'onTimeUpdate'
+		| 'onNextTrack'
+		| 'onPreviousTrack'
 	> {
 	// ─────────────────────────────────────────────────────────────────────
 	// Audio source (Astro-required override)

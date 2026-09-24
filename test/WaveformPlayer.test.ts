@@ -16,7 +16,7 @@
  *
  * @see ../src/WaveformPlayer.astro
  */
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, expectTypeOf, beforeAll, vi } from 'vitest';
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 // The Astro shim in src/astro-shim.d.ts models component imports as opaque
 // factories. The container API wants its own `AstroComponentFactory` type
@@ -224,6 +224,27 @@ describe('<WaveformPlayer> — waveform visualisation props', () => {
 		const html = await render({ url: '/a.mp3', waveform: url });
 
 		expect(getAttr(html, 'data-waveform')).toBe(url);
+	});
+});
+
+// ─── Gradient axis + seek handle ─────────────────────────────────────────
+
+describe('<WaveformPlayer> — waveformGradient + seekHandle', () => {
+	// Typed via the core's WaveformPlayerOptions since core 1.18 / 1.17, but
+	// the data-* emission is hand-written — so both type-checked and were
+	// silently dropped. The core reads `data-waveform-gradient` as a plain
+	// axis string ('vertical' | 'horizontal' | 'diagonal') and
+	// `data-seek-handle` as a boolean.
+	it('emits data-waveform-gradient and data-seek-handle (including false)', async () => {
+		const html = await render({ url: '/a.mp3', waveformGradient: 'horizontal', seekHandle: false });
+		expect(getAttr(html, 'data-waveform-gradient')).toBe('horizontal');
+		expect(getAttr(html, 'data-seek-handle')).toBe('false');
+	});
+
+	it('omits both when unset so the core defaults apply', async () => {
+		const html = await render({ url: '/a.mp3' });
+		expectNoAttr(html, 'data-waveform-gradient');
+		expectNoAttr(html, 'data-seek-handle');
 	});
 });
 
@@ -499,6 +520,19 @@ describe('<WaveformPlayer> — Astro extras', () => {
 	it('passes through inline style', async () => {
 		const html = await render({ url: '/a.mp3', style: 'min-height: 64px;' });
 		expect(getAttr(html, 'style')).toBe('min-height: 64px;');
+	});
+});
+
+// ─── Types ───────────────────────────────────────────────────────────────
+
+describe('WaveformPlayerProps (types)', () => {
+	it('omits every core callback, including onNextTrack / onPreviousTrack', () => {
+		// A function can't cross the server-rendered data-* boundary, so a typed
+		// callback prop would type-check and then do nothing. Lifecycle is
+		// observed through the DOM `waveformplayer:*` events instead.
+		expectTypeOf<WaveformPlayerProps>().not.toHaveProperty('onPlay');
+		expectTypeOf<WaveformPlayerProps>().not.toHaveProperty('onNextTrack');
+		expectTypeOf<WaveformPlayerProps>().not.toHaveProperty('onPreviousTrack');
 	});
 });
 

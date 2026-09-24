@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`onNextTrack` / `onPreviousTrack` are no longer props.** They were typed —
+  `WaveformPlayerProps` omitted the lifecycle callbacks but not these two — yet a
+  server-rendered component can't carry a function into a `data-*` attribute, so
+  they type-checked and did nothing. Now omitted with the other callbacks.
+  Lock-screen skip buttons need a player constructed in client JS (or
+  `@arraypress/waveform-bar` / `-playlist`, which supply the handlers).
+
+### Fixed
+
+- **`waveformGradient` and `seekHandle` now reach the player**, as
+  `data-waveform-gradient` (the axis string) and `data-seek-handle`. Both have
+  been typed props since the core added them (1.18.0 / 1.17.0), but the
+  `data-*` emission is hand-written and never listed them, so they were
+  silently dropped.
+
 ## [0.7.0] — 2026-07-22
 
 ### Added
