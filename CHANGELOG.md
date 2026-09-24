@@ -15,6 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   they type-checked and did nothing. Now omitted with the other callbacks.
   Lock-screen skip buttons need a player constructed in client JS (or
   `@arraypress/waveform-bar` / `-playlist`, which supply the handlers).
+- **Core peer floor raised to `@arraypress/waveform-player@^1.23.0`** (was
+  `^1.20.0`). The component emits `data-button-radius` /
+  `data-artwork-position` (core 1.22.0) and `data-cross-origin` (1.23.0); an
+  older core ignores them, so those props silently did nothing on the declared
+  range. The dev dependency moves to `^1.27.1` (was `^1.22.0`, which predates
+  the `crossOrigin` type). A new test pins the floor to the newest attribute
+  emitted.
 
 ### Fixed
 
