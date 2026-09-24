@@ -81,6 +81,14 @@
  * any container already flagged `data-waveform-initialized`, so the
  * re-init is safe to call repeatedly.
  *
+ * The swap also has to *end* the outgoing players: removing a container
+ * from the DOM doesn't stop the player's detached `new Audio()`, so a
+ * playing track would keep going with no UI to pause it, and its
+ * instance would stay registered forever. Every instance (lazy or not)
+ * ships a one-time `astro:before-swap` handler (`window.__wfpSwapBound`)
+ * that destroys the players whose containers are leaving the page —
+ * keeping any inside a `transition:persist` host the next page carries.
+ *
  * @example Basic
  *   <WaveformPlayer url="/audio/track.mp3" title="My Track" />
  *
@@ -327,6 +335,63 @@ const initAttr = lazy ? 'data-waveform-player-lazy' : 'data-waveform-player';
 	class:list={['wfp-host', className]}
 	style={style}
 ></div>
+
+<script is:inline>
+	/**
+	 * View Transitions teardown for every `<WaveformPlayer>` (lazy or not).
+	 *
+	 * A client-side navigation swaps the DOM, but removing a player's
+	 * container doesn't stop it: the core's detached `new Audio()` keeps
+	 * playing with no UI left to pause it, and the instance stays in
+	 * `WaveformPlayer.instances` for the rest of the session. So before each
+	 * swap, destroy the players whose containers are leaving the page.
+	 *
+	 * Scoped to declarative players (`[data-waveform-player]` — the markup
+	 * this component renders and the core's scan / our re-init mount).
+	 * Players built by a framework island (the React / Vue / Svelte wrappers)
+	 * are left to that framework, which would otherwise destroy them twice.
+	 *
+	 * A container inside a `transition:persist` host survives the swap when
+	 * the incoming page has a host with the same persist key — Astro moves
+	 * that element across — so those players are kept.
+	 *
+	 * Deduplicated via `window.__wfpSwapBound`; a no-op outside the browser
+	 * and before the core's script has loaded.
+	 */
+	(function () {
+		if (typeof window === 'undefined' || typeof document === 'undefined') return;
+		if (window.__wfpSwapBound) return;
+		window.__wfpSwapBound = true;
+
+		var PERSIST = 'data-astro-transition-persist';
+
+		function carriedOver(container, newDocument) {
+			var host = container.closest && container.closest('[' + PERSIST + ']');
+			if (!host || !newDocument) return false;
+			var key = host.getAttribute(PERSIST);
+			var incoming = newDocument.querySelectorAll('[' + PERSIST + ']');
+			for (var i = 0; i < incoming.length; i++) {
+				if (incoming[i].getAttribute(PERSIST) === key) return true;
+			}
+			return false;
+		}
+
+		document.addEventListener('astro:before-swap', function (event) {
+			var WP = window.WaveformPlayer;
+			if (!WP || typeof WP.getAllInstances !== 'function') return;
+			WP.getAllInstances().forEach(function (player) {
+				var container = player && player.container;
+				if (!container || !container.hasAttribute('data-waveform-player')) return;
+				if (container.isConnected && carriedOver(container, event.newDocument)) return;
+				try {
+					player.destroy();
+				} catch (err) {
+					console.error('[WaveformPlayerAstro] destroy on swap failed:', err);
+				}
+			});
+		});
+	})();
+</script>
 
 {lazy ? (
 	<script is:inline>

@@ -23,6 +23,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   been typed props since the core added them (1.18.0 / 1.17.0), but the
   `data-*` emission is hand-written and never listed them, so they were
   silently dropped.
+- **View Transitions no longer leave players running after navigation.** The
+  component only re-initialised on `astro:page-load`; nothing tore the outgoing
+  players down, so a playing track kept going from its detached `new Audio()`
+  with no UI left to pause it, and every visited page's instances stayed
+  registered. Each `<WaveformPlayer>` (lazy or not) now also ships a one-time
+  `astro:before-swap` handler that destroys the declarative players whose
+  containers are leaving the page, keeping those inside a `transition:persist`
+  host the next page carries. Players built by framework islands are left to
+  their framework.
 
 ## [0.7.0] — 2026-07-22
 

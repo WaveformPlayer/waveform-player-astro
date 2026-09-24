@@ -500,6 +500,116 @@ describe('<WaveformPlayer> — View Transitions re-init', () => {
 	});
 });
 
+// ─── View Transitions teardown (astro:before-swap) ───────────────────────
+
+/**
+ * Pull the before-swap teardown script out of the rendered HTML and run it
+ * against hand-rolled `window` / `document` fakes — the test env is plain
+ * Node, and all the script touches is `addEventListener`, the core's static
+ * instance list, and each container's `closest()` / `getAttribute()`.
+ */
+function runSwapScript(html: string, instances: unknown[]) {
+	const scripts = [...html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+	const code = scripts.find((s) => s.includes('astro:before-swap'));
+	if (!code) throw new Error('no astro:before-swap script in the rendered HTML');
+	const listeners: Record<string, Array<(e: unknown) => void>> = {};
+	const fakeDocument = {
+		addEventListener: (type: string, fn: (e: unknown) => void) => {
+			(listeners[type] ??= []).push(fn);
+		},
+	};
+	const fakeWindow: Record<string, unknown> = {
+		WaveformPlayer: { getAllInstances: () => instances.slice() },
+	};
+	new Function('window', 'document', code)(fakeWindow, fakeDocument);
+	return {
+		listeners,
+		fakeWindow,
+		swap(persistKeysInNewDoc: string[] = []) {
+			const newDocument = {
+				querySelectorAll: () =>
+					persistKeysInNewDoc.map((k) => ({ getAttribute: () => k })),
+			};
+			(listeners['astro:before-swap'] ?? []).forEach((fn) => fn({ newDocument }));
+		},
+	};
+}
+
+/** A fake player whose container optionally sits inside a transition:persist host. */
+function fakePlayer(opts: { declarative?: boolean; persistKey?: string; connected?: boolean } = {}) {
+	const { declarative = true, persistKey, connected = true } = opts;
+	const container = {
+		isConnected: connected,
+		hasAttribute: (name: string) => declarative && name === 'data-waveform-player',
+		closest: (sel: string) =>
+			persistKey && sel === '[data-astro-transition-persist]'
+				? { getAttribute: () => persistKey }
+				: null,
+	};
+	return { container, destroy: vi.fn() };
+}
+
+describe('<WaveformPlayer> — View Transitions teardown', () => {
+	it('ships the before-swap teardown for lazy and non-lazy players alike', async () => {
+		for (const lazy of [false, true]) {
+			const html = await render({ url: '/a.mp3', lazy });
+			expect(html).toContain('astro:before-swap');
+			expect(html).toContain('__wfpSwapBound');
+		}
+	});
+
+	it('destroys players whose containers leave the page on swap', async () => {
+		const leaving = fakePlayer();
+		const detached = fakePlayer({ connected: false });
+		const { swap } = runSwapScript(await render({ url: '/a.mp3' }), [leaving, detached]);
+		swap();
+		expect(leaving.destroy).toHaveBeenCalledTimes(1);
+		expect(detached.destroy).toHaveBeenCalledTimes(1);
+	});
+
+	it('keeps players inside a transition:persist host the new page also has', async () => {
+		const persisted = fakePlayer({ persistKey: 'player-dock' });
+		const notCarriedOver = fakePlayer({ persistKey: 'old-only' });
+		const { swap } = runSwapScript(await render({ url: '/a.mp3' }), [persisted, notCarriedOver]);
+		swap(['player-dock']);
+		expect(persisted.destroy).not.toHaveBeenCalled();
+		expect(notCarriedOver.destroy).toHaveBeenCalledTimes(1);
+	});
+
+	it('leaves players it did not mount (no data-waveform-player) to their owners', async () => {
+		// e.g. a React/Vue island's player — its framework owns the lifecycle
+		// and would destroy it a second time.
+		const island = fakePlayer({ declarative: false });
+		const { swap } = runSwapScript(await render({ url: '/a.mp3' }), [island]);
+		swap();
+		expect(island.destroy).not.toHaveBeenCalled();
+	});
+
+	it('binds once per page and survives a missing core or a throwing destroy()', async () => {
+		const html = await render({ url: '/a.mp3' });
+		const boom = fakePlayer();
+		boom.destroy.mockImplementation(() => {
+			throw new Error('boom');
+		});
+		const after = fakePlayer();
+		const run = runSwapScript(html, [boom, after]);
+		const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+		expect(() => run.swap()).not.toThrow();
+		expect(after.destroy).toHaveBeenCalledTimes(1);
+		error.mockRestore();
+
+		// Second copy of the script on the same page (a second player) is a no-op.
+		new Function('window', 'document', html.match(/<script[^>]*>([\s\S]*?astro:before-swap[\s\S]*?)<\/script>/)![1])(
+			run.fakeWindow,
+			{ addEventListener: () => { throw new Error('bound twice'); } }
+		);
+
+		// No core on the page yet: the handler must not throw.
+		delete run.fakeWindow.WaveformPlayer;
+		expect(() => run.swap()).not.toThrow();
+	});
+});
+
 // ─── Astro extras ────────────────────────────────────────────────────────
 
 describe('<WaveformPlayer> — Astro extras', () => {

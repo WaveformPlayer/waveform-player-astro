@@ -87,6 +87,16 @@ declare global {
 		 * @internal
 		 */
 		__wfpInitBound?: boolean;
+
+		/**
+		 * Internal — set by `<WaveformPlayer>`'s inline teardown script to
+		 * deduplicate the `astro:before-swap` listener that destroys
+		 * outgoing players on View Transitions navigations. Do not rely on
+		 * this; it is an implementation detail.
+		 *
+		 * @internal
+		 */
+		__wfpSwapBound?: boolean;
 	}
 }
 
