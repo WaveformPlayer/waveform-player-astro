@@ -1,6 +1,6 @@
 <div align="center">
 
-# Waveform Player for Astro
+# WaveformPlayer for Astro
 
 **Typed Astro component wrapper for `@arraypress/waveform-player`.**
 Every library option as a prop, `data-*` serialisation handled for you, plus optional lazy-mount for large grids.
