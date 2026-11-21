@@ -22,7 +22,7 @@
  * omitted, the wrapper emits no corresponding `data-*` attribute, letting
  * the core library apply its own internal defaults.
  *
- * @see {@link https://github.com/arraypress/waveform-player} — core library
+ * @see {@link https://github.com/WaveformPlayer/waveform-player} — core library
  */
 
 import type { WaveformPlayerOptions } from '@arraypress/waveform-player';
